@@ -8,10 +8,14 @@ import jmespath
 import pandas as pd
 import requests
 from rich.progress import track
-
+from azure.ai.evaluation import (
+    evaluate, 
+    FluencyEvaluator
+)
 from evaltools import service_setup
 
 from .evaluate_metrics import metrics_by_name
+
 
 logger = logging.getLogger("evaltools")
 
@@ -164,9 +168,7 @@ def run_evaluation(
                 ground_truth=row["truth"],
             )
             output.update(result)
-
-        ou
-
+        
         return output
 
     # Run evaluations in serial to avoid rate limiting
@@ -181,6 +183,16 @@ def run_evaluation(
     with open(results_dir / "eval_results.jsonl", "w", encoding="utf-8") as results_file:
         for row in questions_with_ratings:
             results_file.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    # Using AI project evaluator
+    evaluate(
+            evaluation_name="RAG comprehensive evaluation",
+            data=f"{results_dir}/eval_results.jsonl",
+            evaluators={
+                "Fluency": FluencyEvaluator(openai_config)
+            }, 
+            azure_ai_project=azure_ai_project,
+        )
 
     # Calculate aggregate metrics
     df = pd.DataFrame(questions_with_ratings)
@@ -204,7 +216,7 @@ def run_evaluation(
             "num_questions": num_questions,
         }
         parameters_file.write(json.dumps(parameters, indent=4))
-    logger.info("Evaluation results saved in %s", results_dir)
+    logger.info("Evaluation s saved in %s", results_dir)
     return True
 
 
