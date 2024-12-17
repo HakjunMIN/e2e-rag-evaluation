@@ -5,7 +5,7 @@ from typing import Union
 import openai
 from azure.ai.evaluation import AzureOpenAIModelConfiguration, OpenAIModelConfiguration
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import AzureDeveloperCliCredential, get_bearer_token_provider
+from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
 
 logger = logging.getLogger("evaltools")
@@ -18,8 +18,11 @@ def get_azd_credential(tenant_id: Union[str, None]) -> AzureDeveloperCliCredenti
     logger.info("Using Azure Developer CLI Credential for home tenant")
     return AzureDeveloperCliCredential(process_timeout=60)
 
+def get_azure_ai_credential():
+    return DefaultAzureCredential()
 
 def get_openai_config() -> dict:
+
     if os.environ.get("OPENAI_HOST") == "azure":
         azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
         azure_deployment = os.environ.get("AZURE_OPENAI_EVAL_DEPLOYMENT")

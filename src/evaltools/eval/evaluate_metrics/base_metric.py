@@ -18,6 +18,7 @@ class BaseMetric(ABC):
     @classmethod
     def get_aggregate_stats_for_numeric_rating(cls, df, rating_column_name):
         # Narrow down dataframe to just the metric
+        logger.info(f"rating_column_name: {rating_column_name}")
         df = df[[rating_column_name]]
 
         # Drop invalid ratings - strings like "Failed"

@@ -97,6 +97,7 @@ def run_evaluation(
     target_response_context_jmespath=None,
     model=None,
     azure_credential=None,
+    azure_ai_project=None,
 ):
     logger.info("Running evaluation using data from %s", testdata_path)
     testdata = load_jsonl(testdata_path)
@@ -156,13 +157,15 @@ def run_evaluation(
         )
         output.update(target_response)
         for metric in requested_metrics:
-            result = metric.evaluator_fn(openai_config=openai_config)(
+            result = metric.evaluator_fn(openai_config=openai_config, azure_ai_project=azure_ai_project, credential=azure_credential)(
                 query=row["question"],
                 response=output["answer"],
                 context=output["context"],
                 ground_truth=row["truth"],
             )
             output.update(result)
+
+        ou
 
         return output
 
@@ -242,6 +245,12 @@ def run_evaluate_from_config(
     if results_dir is None:
         results_dir = working_dir / Path(config["results_dir"])
 
+    azure_ai_project = {
+            "subscription_id": os.environ.get("AZURE_SUBSCRIPTION_ID"),
+            "resource_group_name": os.environ.get("AZURE_RESOURCE_GROUP_NAME"),
+            "project_name": os.environ.get("AZURE_PROJECT_NAME"),
+        }
+    
     evaluation_run_complete = run_evaluation(
         openai_config=openai_config or service_setup.get_openai_config(),
         testdata_path=working_dir / config["testdata_path"],
@@ -257,6 +266,7 @@ def run_evaluate_from_config(
         target_response_context_jmespath=config.get("target_response_context_jmespath", "context.data_points.text"),
         model=model or os.environ["OPENAI_GPT_MODEL"],
         azure_credential=azure_credential,
+        azure_ai_project=azure_ai_project,
     )
 
     if evaluation_run_complete:

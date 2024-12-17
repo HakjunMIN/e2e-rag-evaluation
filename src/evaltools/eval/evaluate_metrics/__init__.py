@@ -5,6 +5,7 @@ from .builtin_metrics import (
     BuiltinGroundednessMetric,
     BuiltinRelevanceMetric,
     BuiltinSimilarityMetric,
+    BuiltinViolenceMetric
 )
 from .code_metrics import AnswerLengthMetric, CitationMatchMetric, HasCitationMetric, LatencyMetric
 from .prompt_metrics import CoherenceMetric, DontKnownessMetric, GroundednessMetric, RelevanceMetric
@@ -24,6 +25,7 @@ metrics = [
     AnswerLengthMetric,
     HasCitationMetric,
     CitationMatchMetric,
+    BuiltinViolenceMetric
 ]
 
 metrics_by_name = {metric.METRIC_NAME: metric for metric in metrics}

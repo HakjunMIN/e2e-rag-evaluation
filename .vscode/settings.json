@@ -7,5 +7,6 @@
         ".pytest_cache": true,
         "__pycache__": true,
         ".mypy_cache": true
-    }
+    },
+    "sarif-viewer.connectToGithubCodeScanning": "off"
 }

@@ -2,7 +2,7 @@
     "testdata_path": "example_input/qa.jsonl",
     "results_dir": "example_results/baseline",
     "requested_metrics": ["gpt_groundedness", "gpt_relevance", "answer_length", "latency"],
-    "target_url": "http://localhost:50505/chat",
+    "target_url": "http://localhost:8088/chat",
     "target_parameters": {
         "overrides": {
             "top": 3,
