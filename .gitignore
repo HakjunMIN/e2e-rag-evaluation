@@ -155,3 +155,5 @@ mlruns/
 pamelas_blog_input/
 pamelas_blog_results/
 pamelas_blog_results_dontknows/
+
+example_results/experiment1*

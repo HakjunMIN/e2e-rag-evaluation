@@ -83,7 +83,7 @@ def evaluate(
         help="Directory to save the results of the evaluation", default=None, parser=path_or_none
     ),
 ):
-    run_evaluate_from_config(Path.cwd(), config, numquestions, targeturl, resultsdir)
+    run_evaluate_from_config(Path.cwd(), config, numquestions, targeturl, resultsdir, azure_credential=service_setup.get_azure_ai_credential())
 
 
 def str_or_none(value: str) -> str | None:
