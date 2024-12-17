@@ -4,6 +4,9 @@ import math
 import random
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any, Dict, List
+import os
+from functools import lru_cache
 
 from azure.ai.generative.synthetic.qa import QADataGenerator, QAType
 from azure.search.documents import SearchClient
@@ -12,6 +15,33 @@ from evaltools import service_setup
 
 logger = logging.getLogger("evaltools")
 
+class CustomizedTemplateQADataGenerator(QADataGenerator):     
+    def _get_messages_for_qa_type(self, qa_type: QAType, text: str, num_questions: int) -> List:
+        logger.debug("Getting prompt messages for %s QA type", qa_type)
+        template_filename = {
+            QAType.SHORT_ANSWER: "prompt_qa_short_answer.txt",
+            QAType.LONG_ANSWER: "prompt_qa_long_answer.txt",
+            QAType.BOOLEAN: "prompt_qa_boolean.txt",
+            QAType.SUMMARY: "prompt_qa_summary.txt",
+            QAType.CONVERSATION: "prompt_qa_conversation.txt",
+        }
+        filename = template_filename[qa_type]
+        messages = self._get_messages_from_file(filename)
+        input_variables: Dict[str, Any] = {"text": text}
+        if qa_type == QAType.SUMMARY:
+            input_variables["num_words"] = 100
+        else:
+            input_variables["num_questions"] = num_questions
+        messages[-1]["content"] = messages[-1]["content"].format(**input_variables)
+        return messages
+
+    @lru_cache
+    def _get_template(self, filename) -> str:
+        logger.debug("Getting prompt template from %s file", filename)
+        filepath = os.path.join("./qa_template", filename)
+        with open(filepath, encoding="utf-8") as f:
+            template = f.read()
+        return template
 
 def generate_test_qa_data(
     openai_config: dict,
@@ -27,7 +57,9 @@ def generate_test_qa_data(
         num_questions_total,
         num_questions_per_source,
     )
-    qa_generator = QADataGenerator(model_config=openai_config)
+
+
+    qa_generator = CustomizedTemplateQADataGenerator(model_config=openai_config)
 
     qa: list[dict] = []
     for source in source_retriever():
@@ -49,7 +81,7 @@ def generate_test_qa_data(
         directory.mkdir(parents=True)
     with open(output_file, "w", encoding="utf-8") as f:
         for item in qa[0:num_questions_total]:
-            f.write(json.dumps(item) + "\n")
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
 
 def generate_test_qa_data_for_search_index(
@@ -146,9 +178,10 @@ def generate_dontknows_qa_data(openai_config: dict, num_questions_total: int, in
     )
 
     logger.info("Writing %d off-topic questions to %s", len(dontknows_qa), output_file)
+
     directory = Path(output_file).parent
     if not directory.exists():
         directory.mkdir(parents=True)
     with open(output_file, "w", encoding="utf-8") as f:
         for item in dontknows_qa:
-            f.write(json.dumps(item) + "\n")
+            f.write(json.dumps(item, enable_ascii=False) + "\n")
