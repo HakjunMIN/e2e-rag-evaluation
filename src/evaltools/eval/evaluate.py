@@ -184,15 +184,15 @@ def run_evaluation(
         for row in questions_with_ratings:
             results_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    # Using AI project evaluator
-    evaluate(
-            evaluation_name="RAG comprehensive evaluation",
-            data=f"{results_dir}/eval_results.jsonl",
-            evaluators={
-                "Fluency": FluencyEvaluator(openai_config)
-            }, 
-            azure_ai_project=azure_ai_project,
-        )
+    # # Using AI project evaluator
+    # evaluate(
+    #         evaluation_name="RAG comprehensive evaluation",
+    #         data=f"{results_dir}/eval_results.jsonl",
+    #         evaluators={
+    #             "Fluency": FluencyEvaluator(openai_config)
+    #         }, 
+    #         azure_ai_project=azure_ai_project,
+    #     )
 
     # Calculate aggregate metrics
     df = pd.DataFrame(questions_with_ratings)
