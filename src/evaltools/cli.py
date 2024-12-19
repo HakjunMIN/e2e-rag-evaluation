@@ -59,7 +59,7 @@ def generate_dontknows(
     numquestions: int = typer.Option(help="Number of questions to generate", default=40),
 ):
     generate_dontknows_qa_data(
-        openai_config=service_setup.get_openai_config(),
+        openai_config=service_setup.get_openai_config_dict(),
         num_questions_total=numquestions,
         input_file=Path.cwd() / input,
         output_file=Path.cwd() / output,
