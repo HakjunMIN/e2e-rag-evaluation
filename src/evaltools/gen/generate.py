@@ -1,12 +1,12 @@
 import json
 import logging
 import math
+import os
 import random
 from collections.abc import Generator
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List
-import os
-from functools import lru_cache
 
 from azure.ai.generative.synthetic.qa import QADataGenerator, QAType
 from azure.search.documents import SearchClient

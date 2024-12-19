@@ -111,6 +111,7 @@ def run_evaluation(
     model=None,
     azure_credential=None,
     azure_ai_project=None,
+    azure_ai_conn_str=None,
 ):
     logger.info("Running evaluation using data from %s", testdata_path)
     testdata = load_jsonl(testdata_path)
@@ -247,7 +248,7 @@ def run_evaluation(
     # Create an Azure AI Client from a connection string. Avaiable on Azure AI project Overview page.
     project_client = AIProjectClient.from_connection_string(
         credential=azure_credential,
-        conn_str="eastus2.api.azureml.ms;e0493f49-bc5c-4207-a643-9b5f6503a36d;rg-llmops-dev;ai-project-nhbcfrc3qjxb6"
+        conn_str=azure_ai_conn_str
     )
     project_client.upload_file(results_dir / "eval_final_results.json")
 
@@ -314,6 +315,7 @@ def run_evaluate_from_config(
     if results_dir is None:
         results_dir = working_dir / Path(config["results_dir"])
 
+    azure_ai_conn_str= os.environ.get("AZURE_AI_PROJECT_CONN_STR")
     azure_ai_project = {
             "subscription_id": os.environ.get("AZURE_SUBSCRIPTION_ID"),
             "resource_group_name": os.environ.get("AZURE_RESOURCE_GROUP_NAME"),
@@ -336,6 +338,7 @@ def run_evaluate_from_config(
         model=model or os.environ["OPENAI_GPT_MODEL"],
         azure_credential=azure_credential,
         azure_ai_project=azure_ai_project,
+        azure_ai_conn_str=azure_ai_conn_str
     )
 
     if evaluation_run_complete:
