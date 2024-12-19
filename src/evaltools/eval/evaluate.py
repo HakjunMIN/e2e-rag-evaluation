@@ -8,17 +8,26 @@ import jmespath
 import pandas as pd
 import requests
 from rich.progress import track
+from azure.ai.projects import AIProjectClient
 from azure.ai.evaluation import (
     evaluate, 
-    FluencyEvaluator
+    FluencyEvaluator, 
+    GroundednessEvaluator, 
+    RelevanceEvaluator, 
+    CoherenceEvaluator,
+    SimilarityEvaluator,
+
 )
 from evaltools import service_setup
 
 from .evaluate_metrics import metrics_by_name
 
+import datetime
 
 logger = logging.getLogger("evaltools")
 
+current_time = datetime.datetime.now() # Format the time as YYYY/MM/DD_HH/MM/SS 
+formatted_time = current_time.strftime("%Y/%m/%d_%H/%M/%S")
 
 def send_question_to_target(
     question: str,
@@ -148,6 +157,7 @@ def run_evaluation(
         metrics_by_name[metric_name] for metric_name in requested_metrics if metric_name in metrics_by_name
     ]
 
+
     def evaluate_row(row):
         output = {}
         output["question"] = row["question"]
@@ -184,15 +194,62 @@ def run_evaluation(
         for row in questions_with_ratings:
             results_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    # # Using AI project evaluator
-    # evaluate(
-    #         evaluation_name="RAG comprehensive evaluation",
-    #         data=f"{results_dir}/eval_results.jsonl",
-    #         evaluators={
-    #             "Fluency": FluencyEvaluator(openai_config)
-    #         }, 
-    #         azure_ai_project=azure_ai_project,
-    #     )
+    # Using AI project evaluator
+    evaluate(
+            evaluation_name=f"RAG evaluation-{formatted_time}",
+            data=f"{results_dir}/eval_results.jsonl",
+            evaluators={
+                "fluency": FluencyEvaluator(openai_config),
+                "groundedness": GroundednessEvaluator(openai_config),
+                "relevance": RelevanceEvaluator(openai_config), 
+                "coherence": CoherenceEvaluator(openai_config),
+                "similarity": SimilarityEvaluator(openai_config),
+
+            }, 
+            evaluator_config={
+                "fluency": {
+                    "column_mapping": {
+                        "response": "${data.answer}"
+                    } 
+                },
+                "groundedness": {
+                    "column_mapping": {
+                        "query": "${data.question}",
+                        "context": "${data.context}",
+                        "response": "${data.answer}"
+                    } 
+                }, 
+                "relevance": {
+                    "column_mapping": {
+                        "query": "${data.question}",
+                        "response": "${data.answer}"
+                    } 
+                }, 
+                "coherence": {
+                    "column_mapping": {
+                        "query": "${data.question}",
+                        "response": "${data.answer}"
+                    } 
+                },
+                "similarity": {
+                    "column_mapping": {
+                        "query": "${data.question}",
+                        "response": "${data.answer}",
+                        "ground_truth": "${data.truth}",
+                    } 
+                }
+            },
+
+            azure_ai_project=azure_ai_project,
+            output_path=results_dir / "eval_final_results.json"
+        )
+    
+    # Create an Azure AI Client from a connection string. Avaiable on Azure AI project Overview page.
+    project_client = AIProjectClient.from_connection_string(
+        credential=azure_credential,
+        conn_str="eastus2.api.azureml.ms;e0493f49-bc5c-4207-a643-9b5f6503a36d;rg-llmops-dev;ai-project-nhbcfrc3qjxb6"
+    )
+    project_client.upload_file(results_dir / "eval_final_results.json")
 
     # Calculate aggregate metrics
     df = pd.DataFrame(questions_with_ratings)
