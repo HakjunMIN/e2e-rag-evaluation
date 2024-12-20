@@ -15,6 +15,11 @@
 pip install -e .
 ```
 
+## Quick start with Notebook
+
+[evaluation_azure_sdk](./notebook/evaluation_azure_sdk.ipynb)를 이용하여 Evaluation의 메커니즘을 빠르게 파악할 수 있음
+
+
 ## 합성 질문/답변 생성
 
 * AI Search Index 데이터의 Chunk (row)별 데이터를 읽어 질문지와 Ground Truth를 생성.
@@ -202,4 +207,6 @@ python -m evaltools summary example_results
 * Azure AI Studio 결과 확인
 ![aistudio_result](./docs/aistudio_result.png)
 
+## Reference
 
+* RAG Evaluator: https://github.com/Azure-Samples/ai-rag-chat-evaluator
