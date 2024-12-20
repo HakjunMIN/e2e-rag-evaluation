@@ -245,7 +245,6 @@ def run_evaluation(
             output_path=results_dir / "eval_final_results.json"
         )
     
-    # Create an Azure AI Client from a connection string. Avaiable on Azure AI project Overview page.
     project_client = AIProjectClient.from_connection_string(
         credential=azure_credential,
         conn_str=azure_ai_conn_str
