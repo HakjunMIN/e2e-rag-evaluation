@@ -147,5 +147,59 @@ pip install -e .
 
 ### Azure AI evaluation의 `evaluate` 메소드를 이용한 표준화된 메트릭 사용
 
+> [!Note]
+> TODO 환경변수로 실행여부 컨트롤
+
+* 사용할 evaluator및 컬럼 매핑
+* `evaluate.py` 샘플 코드 참고
+
+    ```python
+    # Using AI project evaluator
+        evaluate(
+                evaluation_name=f"RAG evaluation-{formatted_time}",
+                data=filepath,
+                evaluators={
+                   "similarity": SimilarityEvaluator(openai_config),
+
+                }, 
+                evaluator_config={                   
+                    "similarity": {
+                        "column_mapping": {
+                            "query": "${data.question}",
+                            "response": "${data.answer}",
+                            "ground_truth": "${data.truth}",
+                        } 
+                    }
+                },
+
+                azure_ai_project=azure_ai_project,
+                output_path=results_dir / "eval_final_results.json"
+            )
+        
+    ```
+
+* AI Project Client를 이용하여 결과 업로드
+
+    ```python
+        project_client = AIProjectClient.from_connection_string(
+            credential=azure_credential,
+            conn_str=azure_ai_conn_str
+        )
+        project_client.upload_file(results_dir / "eval_final_results.json")
+    ```
+
+## Evaluation결과 확인
+
+### Local Evaluation 결과 확인
+
+```bash
+python -m evaltools summary example_results
+```     
+
+* Local 결과 확인
+![local_result](./docs/local_result.png)
+
+* Azure AI Studio 결과 확인
+![aistudio_result](./docs/aistudio_result.png)
 
 

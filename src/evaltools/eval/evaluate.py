@@ -191,10 +191,12 @@ def run_evaluation(
     # Make the results directory if it doesn't exist
     results_dir.mkdir(parents=True, exist_ok=True)
     # Save the results
+    
     with open(results_dir / "eval_results.jsonl", "w", encoding="utf-8") as results_file:
         for row in questions_with_ratings:
             results_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
+    
     # Using AI project evaluator
     evaluate(
             evaluation_name=f"RAG evaluation-{formatted_time}",
