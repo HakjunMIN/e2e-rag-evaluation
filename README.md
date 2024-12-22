@@ -123,7 +123,7 @@ pip install -e .
 
 #### Violence Evaluator 추가 샘플
 
-* `ViolenceEvaluator` 클래스를 상속받아 `evaluate` 메소드를 구현
+* `ViolenceEvaluator` 인스턴스를 만드는 `evaluate_fn` 메소드를 구현하고 어떤 집계 메트릭을 산출할 것인지에 대한 `get_aggregate_stats` 구현
 
     ```python
     
