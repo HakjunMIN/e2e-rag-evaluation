@@ -1,6 +1,12 @@
 # RAG Evaluation Framework
 
-이 Repo에는 RAG(Retrieval-Augmented Generation) 앱앱을 평가하기 위한 프레임워크가 포함되어 있습니다. 이 프레임워크는 다음과 같은 기능을 제공함.
+이 Repo에는 RAG(Retrieval-Augmented Generation) 앱앱을 평가하기 위한 프레임워크가 포함되어 있으며 다음과 같은 특징이 있음.
+
+1. 한국어 RAG앱을 위한 한국어 질문 생성 자동화
+2. Local Evaluation와 Custom 메트릭 측정 자동화. Builtin Evaluation 추가 정의 방법
+3. Builtin Evaluation을 사용 시 Azure AI Project에서 중앙집중 logging.
+
+이 프레임워크는 다음과 같은 기능을 제공함.
 
 1. RAG 앱을 평가하기 위한 Question, Ground Truth 데이터셋 자동생성
 2. 데이터셋을 가지고 우리의 RAG를 호출해서 answer가 어떤지 받아오기.
@@ -83,6 +89,28 @@ pip install -e .
     출력에는 항상 제공된 개수의 QnA가 있어야 합니다.
     ...
     ```
+    * 기타 다른 Prompt를 사용할 수 있으며 QAType에서 정의된 타입에 따라 Prompt를 사용할 수 있음.
+
+    ```python
+    qa_generator = CustomizedTemplateQADataGenerator(model_config=openai_config)
+    qa_generator.generate(
+            text=source_to_text(source),
+            qa_type=QAType.LONG_ANSWER,
+            num_questions=num_questions_per_source,
+        )
+    ```
+
+    * QAType Prompt 템플릿
+
+        | QAType                | 설명                                              | 템플릿 파일                    |
+        |-----------------------|--------------------------------------------------|--------------------------------|
+        | `QAType.SHORT_ANSWER` | 짧은 답변 질문 생성                              | `prompt_qa_short_answer.txt`   |
+        | `QAType.LONG_ANSWER`  | 상세한 답변 질문 생성                            | `prompt_qa_long_answer.txt`    |
+        | `QAType.BOOLEAN`      | 예/아니오 유형의 질문 생성                       | `prompt_qa_boolean.txt`        |
+        | `QAType.SUMMARY`      | 요약 유형의 질문 생성                            | `prompt_qa_summary.txt`        |
+        | `QAType.CONVERSATION` | 대화 기반 질문 생성                              | `prompt_qa_conversation.txt`   |
+
+        각 QAType은 해당 유형의 질문과 답변을 생성하는 방법을 정의하는 특정 프롬프트 템플릿 파일에 해당함. 이러한 템플릿은 RAG 애플리케이션의 도메인과 요구 사항에 맞게 사용자 정의할 수 있음. 
 
 * Configuration 정의
     1. 로컬 수행 용 Evaluation Metric정의: `requested_metrics`
@@ -124,6 +152,10 @@ pip install -e .
 #### Violence Evaluator 추가 샘플
 
 * `ViolenceEvaluator` 인스턴스를 만드는 `evaluate_fn` 메소드를 구현하고 어떤 집계 메트릭을 산출할 것인지에 대한 `get_aggregate_stats` 구현
+
+>![Note]
+>ViolenceEvaluator 정보는 https://learn.microsoft.com/en-us/python/api/azure-ai-evaluation/azure.ai.evaluation.violenceevaluator?view=azure-python
+
 
     ```python
     
@@ -209,4 +241,7 @@ python -m evaltools summary example_results
 
 ## Reference
 
+* Azure AI Evaluation library for Python: https://learn.microsoft.com/en-us/python/api/overview/azure/ai-evaluation-readme?view=azure-
+* Azure AI Evaluation SDK: https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk
 * RAG Evaluator: https://github.com/Azure-Samples/ai-rag-chat-evaluator
+
