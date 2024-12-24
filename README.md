@@ -243,5 +243,5 @@ python -m evaltools summary example_results
 
 * Azure AI Evaluation library for Python: https://learn.microsoft.com/en-us/python/api/overview/azure/ai-evaluation-readme?view=azure-
 * Azure AI Evaluation SDK: https://learn.microsoft.com/en-us/azure/ai-studio/how-to/develop/evaluate-sdk
-* RAG Evaluator: https://github.com/Azure-Samples/ai-rag-chat-evaluator
+* RAG Evaluator(forked): https://github.com/Azure-Samples/ai-rag-chat-evaluator
 
